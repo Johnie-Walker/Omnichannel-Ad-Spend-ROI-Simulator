@@ -1,0 +1,13 @@
+Metric,Value,Scope
+In-sample R2,0.9930651957275173,All data
+In-sample MAPE,0.014516283795149295,All data
+NRMSE,0.01521577629140454,All data
+Durbin-Watson,2.2068077251538085,All data
+Holdout R2,0.9887319004209322,Last 26 weeks
+Holdout MAPE,0.015591838469420378,Last 26 weeks
+Incremental lift (optimized),0.14826501338353615,Plan
+Incremental lift CI90 low,0.08979000705101095,Plan
+Incremental lift CI90 high,0.18110094176869657,Plan
+Total sales lift (optimized),0.0377685049154505,Plan
+Shadow price (marginal ROI),1.58267409705936,Plan
+Ground-truth lift of plan,0.13524526944556925,Simulation audit

@@ -1,0 +1,299 @@
+table '_Measures'
+	lineageTag: fd0e3dfe-58bf-50be-bffd-c036f687abb9
+
+	/// Actual media spend over the modeled history.
+	measure 'Historical Spend' = SUM ( FactMediaWeekly[Spend] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: 31fbebc9-972a-552b-b070-2b801c1aadc9
+
+	/// Sales attributed to media by the MMM (Adstock + Hill decomposition).
+	measure 'Historical Incremental Sales' = SUM ( FactMediaWeekly[Contribution] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: f4c3a0a5-fa1a-5b1b-a971-337d1f7e3722
+
+	/// Incremental sales per $1 of historical spend.
+	measure 'Historical ROI' = DIVIDE ( [Historical Incremental Sales], [Historical Spend] )
+		formatString: 0.00
+		displayFolder: 1. Historical
+		lineageTag: 31bc4dec-865e-569f-bc26-4f10719c960b
+
+	/// Observed sales.
+	measure 'Actual Sales' = SUM ( FactSalesWeekly[ActualSales] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: a6caf4ce-9d3a-5cd6-92eb-e8cc7caf50b1
+
+	/// MMM in-sample fit.
+	measure 'Predicted Sales' = SUM ( FactSalesWeekly[PredictedSales] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: cf79009b-6155-50f8-a1ac-763071bfe608
+
+	/// Out-of-sample forecast from the validation model (last 26 weeks only).
+	measure 'Holdout Prediction' = SUM ( FactSalesWeekly[HoldoutPrediction] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: 7b1208e0-c49b-58d3-8162-25af37ad90e9
+
+	/// Sales the model attributes to non-media drivers (trend, seasonality, price, holidays).
+	measure 'Base Sales' = SUM ( FactSalesWeekly[BaseSales] )
+		formatString: \$#,0
+		displayFolder: 1. Historical
+		lineageTag: ebf416f4-4c29-5247-9867-0238edcc12ed
+
+	/// Share of actual sales driven by paid media.
+	measure 'Media Share of Sales' = DIVIDE ( CALCULATE ( [Historical Incremental Sales], REMOVEFILTERS ( DimChannel ) ), [Actual Sales] )
+		formatString: 0.0%
+		displayFolder: 1. Historical
+		lineageTag: 56c62b8b-ffec-5991-92c5-f6f9d95ecd81
+
+	/// Mean absolute percentage error of the in-sample fit.
+	measure 'Fit MAPE' = AVERAGEX ( FactSalesWeekly, DIVIDE ( ABS ( FactSalesWeekly[ActualSales] - FactSalesWeekly[PredictedSales] ), FactSalesWeekly[ActualSales] ) )
+		formatString: 0.0%
+		displayFolder: 1. Historical
+		lineageTag: 3c5c0808-eaf3-5b26-beb0-f1a4f4334006
+
+	/// Last 52 weeks of spend, scaled to the $5M annual budget.
+	measure 'Current Plan Spend' = SUM ( ModelParameters[CurrentAnnualSpend] )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: f379eff8-4ce2-598f-bdee-5d77bfddb780
+
+	/// Projected annual incremental sales of the current plan.
+	measure 'Current Plan Incremental Sales' = SUM ( ModelParameters[CurrentIncrementalSales] )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: a020e021-8d9d-52ad-8cff-beeb8080ae2d
+
+	/// SciPy SLSQP allocation of the same budget.
+	measure 'Optimized Plan Spend' = SUM ( ModelParameters[OptimalAnnualSpend] )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: ff7475f1-79b9-53d1-a8b2-2330a79ab29f
+
+	/// Projected annual incremental sales of the optimized plan.
+	measure 'Optimized Plan Incremental Sales' = SUM ( ModelParameters[OptimalIncrementalSales] )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: 75e452ff-1223-5e51-bbb1-9ebdd66b851f
+
+	/// Lift in media-driven sales from reallocating the same budget.
+	measure 'Optimized Incremental Lift %' = DIVIDE ( [Optimized Plan Incremental Sales] - [Current Plan Incremental Sales], [Current Plan Incremental Sales] )
+		formatString: 0.0%
+		displayFolder: 2. Plans
+		lineageTag: db85471a-40c3-56fe-84c2-fb6c1dd99a77
+
+	/// Next-year non-media sales (last 52 weeks of modeled base).
+	measure 'Projected Base Sales' = SUM ( DimRegion[ProjectedBaseSales] )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: 6069723e-dfac-57f7-908c-5beb0afdaf3d
+
+	/// Annual budget in the current filter context ($5M nationally).
+	measure 'Budget Target' = CALCULATE ( [Current Plan Spend], REMOVEFILTERS ( DimChannel ) )
+		formatString: \$#,0
+		displayFolder: 2. Plans
+		lineageTag: aa59357b-b3f4-51e4-8394-4c09ff09bd39
+
+	/// Starting plan the spend-level sliders scale.
+	measure 'Plan Baseline Selected' = SELECTEDVALUE ( 'Plan Baseline'[Plan], "Current Plan" )
+		displayFolder: 3. Simulator
+		lineageTag: c9fa1e34-54d6-5ca3-b4ac-f3ab28928067
+
+	/// Annual spend of the simulated plan (baseline plan x channel spend levels).
+	measure 'Sim Spend' =
+			VAR _plan = [Plan Baseline Selected]
+			VAR _mTV = [TV Spend Level Value]
+			VAR _mPaidSearch = [Paid Search Spend Level Value]
+			VAR _mPaidSocial = [Paid Social Spend Level Value]
+			VAR _mDisplay = [Display Spend Level Value]
+			VAR _mRadio = [Radio Spend Level Value]
+			RETURN
+			    SUMX ( ModelParameters,
+			        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+			        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+			        VAR _x = _base * _mult
+			        RETURN _x )
+		formatString: \$#,0
+		displayFolder: 3. Simulator
+		lineageTag: c0a6d50a-918c-5af2-8105-3b7a513cf448
+
+	/// Steady-state annual incremental sales: 52 x Beta x Hill(weekly spend / Norm; K, S).
+	measure 'Sim Incremental Sales' =
+			VAR _plan = [Plan Baseline Selected]
+			VAR _mTV = [TV Spend Level Value]
+			VAR _mPaidSearch = [Paid Search Spend Level Value]
+			VAR _mPaidSocial = [Paid Social Spend Level Value]
+			VAR _mDisplay = [Display Spend Level Value]
+			VAR _mRadio = [Radio Spend Level Value]
+			RETURN
+			    SUMX ( ModelParameters,
+			        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+			        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+			        VAR _x = _base * _mult
+			        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+			        VAR _us = POWER ( _u, ModelParameters[S] )
+			        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+			        RETURN 52 * ModelParameters[Beta] * DIVIDE ( _us, _us + _ks ) )
+		formatString: \$#,0
+		displayFolder: 3. Simulator
+		lineageTag: 2f3b3c87-d7ff-5fbf-b342-705bfe267e25
+
+	/// Average ROI of the simulated plan.
+	measure 'Sim ROI' = DIVIDE ( [Sim Incremental Sales], [Sim Spend] )
+		formatString: 0.00
+		displayFolder: 3. Simulator
+		lineageTag: 53945363-43cd-5f84-b87b-c25556d0a9d2
+
+	/// Incremental sales from the next $1, spread pro rata over the line items in context. Below 1.00 the next dollar loses money.
+	measure 'Sim Marginal ROI' =
+			VAR _plan = [Plan Baseline Selected]
+			VAR _mTV = [TV Spend Level Value]
+			VAR _mPaidSearch = [Paid Search Spend Level Value]
+			VAR _mPaidSocial = [Paid Social Spend Level Value]
+			VAR _mDisplay = [Display Spend Level Value]
+			VAR _mRadio = [Radio Spend Level Value]
+			VAR _spend = [Sim Spend]
+			VAR _weighted =
+			    SUMX ( ModelParameters,
+			        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+			        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+			        VAR _x = _base * _mult
+			        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+			        VAR _us = POWER ( _u, ModelParameters[S] )
+			        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+			        VAR _mroi =
+			            IF ( _u > 0,
+			                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+			                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+			                IF ( ModelParameters[S] > 1, 0,
+			                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+			        RETURN _x * _mroi )
+			VAR _avg =
+			    AVERAGEX ( ModelParameters,
+			        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+			        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+			        VAR _x = _base * _mult
+			        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+			        VAR _us = POWER ( _u, ModelParameters[S] )
+			        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+			        VAR _mroi =
+			            IF ( _u > 0,
+			                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+			                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+			                IF ( ModelParameters[S] > 1, 0,
+			                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+			        RETURN _mroi )
+			RETURN IF ( _spend > 0, DIVIDE ( _weighted, _spend ), _avg )
+		formatString: 0.00
+		displayFolder: 3. Simulator
+		lineageTag: 858b50f3-751e-5486-aa24-53312d5cd7a3
+
+	/// Simulated vs current-plan incremental sales.
+	measure 'Sim Incremental Lift %' = DIVIDE ( [Sim Incremental Sales] - [Current Plan Incremental Sales], [Current Plan Incremental Sales] )
+		formatString: 0.0%
+		displayFolder: 3. Simulator
+		lineageTag: 583e0490-af60-59aa-9970-cd351a9c7fe8
+
+	/// Projected base + simulated media sales (all channels).
+	measure 'Sim Total Sales' = [Projected Base Sales] + CALCULATE ( [Sim Incremental Sales], REMOVEFILTERS ( DimChannel ) )
+		formatString: \$#,0
+		displayFolder: 3. Simulator
+		lineageTag: 5b7f922b-7a01-5241-a416-2f6dcd4f1a9d
+
+	/// Simulated vs current-plan total sales.
+	measure 'Sim Total Sales Lift %' =
+			VAR _cur = [Projected Base Sales] + CALCULATE ( [Current Plan Incremental Sales], REMOVEFILTERS ( DimChannel ) )
+			RETURN DIVIDE ( [Sim Total Sales] - _cur, _cur )
+		formatString: 0.0%
+		displayFolder: 3. Simulator
+		lineageTag: d1790ee1-e2b6-5f14-afff-3aae06db9b05
+
+	/// Simulated spend minus the budget (positive = over budget).
+	measure 'Sim Budget Variance' = CALCULATE ( [Sim Spend], REMOVEFILTERS ( DimChannel ) ) - [Budget Target]
+		formatString: \$#,0
+		displayFolder: 3. Simulator
+		lineageTag: 34a40160-ea0b-5c76-9f85-9aa946efe79e
+
+	/// Text status for a card.
+	measure 'Sim Budget Status' =
+			VAR _v = [Sim Budget Variance]
+			RETURN
+			    SWITCH ( TRUE (),
+			        ABS ( _v ) < 1, "On budget",
+			        _v > 0, "Over budget by " & FORMAT ( _v, "$#,0" ),
+			        "Under budget by " & FORMAT ( -_v, "$#,0" ) )
+		displayFolder: 3. Simulator
+		lineageTag: ec4ceca0-85e0-5a50-9015-1ea1db273832
+
+	/// Simulated vs current spend.
+	measure 'Sim Spend Change %' = DIVIDE ( [Sim Spend] - [Current Plan Spend], [Current Plan Spend] )
+		formatString: 0.0%
+		displayFolder: 3. Simulator
+		lineageTag: 84f40656-1b13-5a65-9f51-3766272892af
+
+	/// Annual incremental sales when every line item in context runs at Spend Index x current spend.
+	measure 'Curve Incremental Sales' =
+			VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+			RETURN
+			    IF ( NOT ISBLANK ( _idx ),
+			        SUMX ( ModelParameters,
+			        VAR _x = ModelParameters[CurrentAnnualSpend] * _idx
+			        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+			        VAR _us = POWER ( _u, ModelParameters[S] )
+			        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+			            RETURN 52 * ModelParameters[Beta] * DIVIDE ( _us, _us + _ks ) ) )
+		formatString: \$#,0
+		displayFolder: 4. Response Curves
+		lineageTag: 8b21775a-9d4b-5930-a317-4f6f1c8b542e
+
+	/// Annual spend at the curve point.
+	measure 'Curve Spend' =
+			VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+			RETURN IF ( NOT ISBLANK ( _idx ), [Current Plan Spend] * _idx )
+		formatString: \$#,0
+		displayFolder: 4. Response Curves
+		lineageTag: f4e83ca0-20c1-5832-8c2a-fb5b86e1580b
+
+	/// Marginal ROI along the response curve; where it crosses 1.00 is break-even.
+	measure 'Curve Marginal ROI' =
+			VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+			VAR _spend = [Current Plan Spend] * _idx
+			VAR _weighted =
+			    SUMX ( ModelParameters,
+			        VAR _x = ModelParameters[CurrentAnnualSpend] * _idx
+			        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+			        VAR _us = POWER ( _u, ModelParameters[S] )
+			        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+			        VAR _mroi =
+			            IF ( _u > 0,
+			                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+			                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+			                IF ( ModelParameters[S] > 1, 0,
+			                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+			        RETURN _x * _mroi )
+			RETURN IF ( NOT ISBLANK ( _idx ) && _spend > 0, DIVIDE ( _weighted, _spend ) )
+		formatString: 0.00
+		displayFolder: 4. Response Curves
+		lineageTag: 2c56eef7-d0bc-5f04-b929-7badc4fc7122
+
+	/// Reference line: marginal ROI = 1.00.
+	measure 'Break-even Line' = 1
+		formatString: 0.00
+		displayFolder: 4. Response Curves
+		lineageTag: 0549a4a4-3b0a-5f1a-a747-fe4b742f1bc8
+
+	column Value
+		dataType: int64
+		isHidden
+		lineageTag: 05c2b42a-70a6-55f5-a049-bc7ee818455a
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition '_Measures' = calculated
+		mode: import
+		source = { 0 }

@@ -1,0 +1,48 @@
+table DimRegion
+	lineageTag: e0886444-a657-52f9-85bf-685bf2876ed3
+
+	column Region
+		dataType: string
+		lineageTag: b2847253-4e26-5d63-b177-3f8876851a35
+		summarizeBy: none
+		sourceColumn: Region
+		sortByColumn: RegionOrder
+
+		annotation SummarizationSetBy = Automatic
+
+	column RegionOrder
+		dataType: int64
+		lineageTag: 8ca5565a-ceb7-52d9-a093-357458776a7a
+		summarizeBy: none
+		sourceColumn: RegionOrder
+
+		annotation SummarizationSetBy = Automatic
+
+	column MarketSizeShare
+		dataType: double
+		lineageTag: 1defc5a2-9df0-5385-af71-965f5acee055
+		summarizeBy: none
+		sourceColumn: MarketSizeShare
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProjectedBaseSales
+		dataType: double
+		formatString: \$#,0
+		lineageTag: ad82a5c6-2716-5b87-9b61-37d50cb49cf9
+		summarizeBy: sum
+		sourceColumn: ProjectedBaseSales
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimRegion = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "DimRegion.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Region", type text}, {"RegionOrder", Int64.Type}, {"MarketSizeShare", type number}, {"ProjectedBaseSales", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

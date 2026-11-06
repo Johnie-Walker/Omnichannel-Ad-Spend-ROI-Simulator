@@ -1,0 +1,264 @@
+// Omnichannel Ad Spend & ROI Simulator - DAX measures (generated; do not edit by hand)
+// Home table: _Measures.  What-if parameter tables:
+//   'TV Spend Level' = GENERATESERIES ( 0, 2.5, 0.05 )   ->  [TV Spend Level Value] = SELECTEDVALUE ( 'TV Spend Level'[TV Spend Level], 1 )
+//   'Paid Search Spend Level' = GENERATESERIES ( 0, 2.5, 0.05 )   ->  [Paid Search Spend Level Value] = SELECTEDVALUE ( 'Paid Search Spend Level'[Paid Search Spend Level], 1 )
+//   'Paid Social Spend Level' = GENERATESERIES ( 0, 2.5, 0.05 )   ->  [Paid Social Spend Level Value] = SELECTEDVALUE ( 'Paid Social Spend Level'[Paid Social Spend Level], 1 )
+//   'Display Spend Level' = GENERATESERIES ( 0, 2.5, 0.05 )   ->  [Display Spend Level Value] = SELECTEDVALUE ( 'Display Spend Level'[Display Spend Level], 1 )
+//   'Radio Spend Level' = GENERATESERIES ( 0, 2.5, 0.05 )   ->  [Radio Spend Level Value] = SELECTEDVALUE ( 'Radio Spend Level'[Radio Spend Level], 1 )
+//   'Plan Baseline' = DATATABLE ( "Plan", STRING, "Plan Order", INTEGER, { { "Current Plan", 1 }, { "Optimized Plan", 2 } } )
+//   'Spend Curve'   = GENERATESERIES ( 0, 3, 0.05 )   (rename column to [Spend Index])
+
+
+// ===== 1. Historical ==================================================
+// Actual media spend over the modeled history.
+[Historical Spend] =
+SUM ( FactMediaWeekly[Spend] )
+// format: \$#,0
+
+// Sales attributed to media by the MMM (Adstock + Hill decomposition).
+[Historical Incremental Sales] =
+SUM ( FactMediaWeekly[Contribution] )
+// format: \$#,0
+
+// Incremental sales per $1 of historical spend.
+[Historical ROI] =
+DIVIDE ( [Historical Incremental Sales], [Historical Spend] )
+// format: 0.00
+
+// Observed sales.
+[Actual Sales] =
+SUM ( FactSalesWeekly[ActualSales] )
+// format: \$#,0
+
+// MMM in-sample fit.
+[Predicted Sales] =
+SUM ( FactSalesWeekly[PredictedSales] )
+// format: \$#,0
+
+// Out-of-sample forecast from the validation model (last 26 weeks only).
+[Holdout Prediction] =
+SUM ( FactSalesWeekly[HoldoutPrediction] )
+// format: \$#,0
+
+// Sales the model attributes to non-media drivers (trend, seasonality, price, holidays).
+[Base Sales] =
+SUM ( FactSalesWeekly[BaseSales] )
+// format: \$#,0
+
+// Share of actual sales driven by paid media.
+[Media Share of Sales] =
+DIVIDE ( CALCULATE ( [Historical Incremental Sales], REMOVEFILTERS ( DimChannel ) ), [Actual Sales] )
+// format: 0.0%
+
+// Mean absolute percentage error of the in-sample fit.
+[Fit MAPE] =
+AVERAGEX ( FactSalesWeekly, DIVIDE ( ABS ( FactSalesWeekly[ActualSales] - FactSalesWeekly[PredictedSales] ), FactSalesWeekly[ActualSales] ) )
+// format: 0.0%
+
+
+// ===== 2. Plans ==================================================
+// Last 52 weeks of spend, scaled to the $5M annual budget.
+[Current Plan Spend] =
+SUM ( ModelParameters[CurrentAnnualSpend] )
+// format: \$#,0
+
+// Projected annual incremental sales of the current plan.
+[Current Plan Incremental Sales] =
+SUM ( ModelParameters[CurrentIncrementalSales] )
+// format: \$#,0
+
+// SciPy SLSQP allocation of the same budget.
+[Optimized Plan Spend] =
+SUM ( ModelParameters[OptimalAnnualSpend] )
+// format: \$#,0
+
+// Projected annual incremental sales of the optimized plan.
+[Optimized Plan Incremental Sales] =
+SUM ( ModelParameters[OptimalIncrementalSales] )
+// format: \$#,0
+
+// Lift in media-driven sales from reallocating the same budget.
+[Optimized Incremental Lift %] =
+DIVIDE ( [Optimized Plan Incremental Sales] - [Current Plan Incremental Sales], [Current Plan Incremental Sales] )
+// format: 0.0%
+
+// Next-year non-media sales (last 52 weeks of modeled base).
+[Projected Base Sales] =
+SUM ( DimRegion[ProjectedBaseSales] )
+// format: \$#,0
+
+// Annual budget in the current filter context ($5M nationally).
+[Budget Target] =
+CALCULATE ( [Current Plan Spend], REMOVEFILTERS ( DimChannel ) )
+// format: \$#,0
+
+
+// ===== 3. Simulator ==================================================
+// Starting plan the spend-level sliders scale.
+[Plan Baseline Selected] =
+SELECTEDVALUE ( 'Plan Baseline'[Plan], "Current Plan" )
+// format: text
+
+// Annual spend of the simulated plan (baseline plan x channel spend levels).
+[Sim Spend] =
+VAR _plan = [Plan Baseline Selected]
+VAR _mTV = [TV Spend Level Value]
+VAR _mPaidSearch = [Paid Search Spend Level Value]
+VAR _mPaidSocial = [Paid Social Spend Level Value]
+VAR _mDisplay = [Display Spend Level Value]
+VAR _mRadio = [Radio Spend Level Value]
+RETURN
+    SUMX ( ModelParameters,
+        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+        VAR _x = _base * _mult
+        RETURN _x )
+// format: \$#,0
+
+// Steady-state annual incremental sales: 52 x Beta x Hill(weekly spend / Norm; K, S).
+[Sim Incremental Sales] =
+VAR _plan = [Plan Baseline Selected]
+VAR _mTV = [TV Spend Level Value]
+VAR _mPaidSearch = [Paid Search Spend Level Value]
+VAR _mPaidSocial = [Paid Social Spend Level Value]
+VAR _mDisplay = [Display Spend Level Value]
+VAR _mRadio = [Radio Spend Level Value]
+RETURN
+    SUMX ( ModelParameters,
+        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+        VAR _x = _base * _mult
+        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+        VAR _us = POWER ( _u, ModelParameters[S] )
+        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+        RETURN 52 * ModelParameters[Beta] * DIVIDE ( _us, _us + _ks ) )
+// format: \$#,0
+
+// Average ROI of the simulated plan.
+[Sim ROI] =
+DIVIDE ( [Sim Incremental Sales], [Sim Spend] )
+// format: 0.00
+
+// Incremental sales from the next $1, spread pro rata over the line items in context. Below 1.00 the next dollar loses money.
+[Sim Marginal ROI] =
+VAR _plan = [Plan Baseline Selected]
+VAR _mTV = [TV Spend Level Value]
+VAR _mPaidSearch = [Paid Search Spend Level Value]
+VAR _mPaidSocial = [Paid Social Spend Level Value]
+VAR _mDisplay = [Display Spend Level Value]
+VAR _mRadio = [Radio Spend Level Value]
+VAR _spend = [Sim Spend]
+VAR _weighted =
+    SUMX ( ModelParameters,
+        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+        VAR _x = _base * _mult
+        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+        VAR _us = POWER ( _u, ModelParameters[S] )
+        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+        VAR _mroi =
+            IF ( _u > 0,
+                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+                IF ( ModelParameters[S] > 1, 0,
+                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+        RETURN _x * _mroi )
+VAR _avg =
+    AVERAGEX ( ModelParameters,
+        VAR _base = IF ( _plan = "Optimized Plan", ModelParameters[OptimalAnnualSpend], ModelParameters[CurrentAnnualSpend] )
+        VAR _mult = SWITCH ( ModelParameters[Channel], "TV", _mTV, "Paid Search", _mPaidSearch, "Paid Social", _mPaidSocial, "Display", _mDisplay, "Radio", _mRadio, 1 )
+        VAR _x = _base * _mult
+        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+        VAR _us = POWER ( _u, ModelParameters[S] )
+        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+        VAR _mroi =
+            IF ( _u > 0,
+                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+                IF ( ModelParameters[S] > 1, 0,
+                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+        RETURN _mroi )
+RETURN IF ( _spend > 0, DIVIDE ( _weighted, _spend ), _avg )
+// format: 0.00
+
+// Simulated vs current-plan incremental sales.
+[Sim Incremental Lift %] =
+DIVIDE ( [Sim Incremental Sales] - [Current Plan Incremental Sales], [Current Plan Incremental Sales] )
+// format: 0.0%
+
+// Projected base + simulated media sales (all channels).
+[Sim Total Sales] =
+[Projected Base Sales] + CALCULATE ( [Sim Incremental Sales], REMOVEFILTERS ( DimChannel ) )
+// format: \$#,0
+
+// Simulated vs current-plan total sales.
+[Sim Total Sales Lift %] =
+VAR _cur = [Projected Base Sales] + CALCULATE ( [Current Plan Incremental Sales], REMOVEFILTERS ( DimChannel ) )
+RETURN DIVIDE ( [Sim Total Sales] - _cur, _cur )
+// format: 0.0%
+
+// Simulated spend minus the budget (positive = over budget).
+[Sim Budget Variance] =
+CALCULATE ( [Sim Spend], REMOVEFILTERS ( DimChannel ) ) - [Budget Target]
+// format: \$#,0
+
+// Text status for a card.
+[Sim Budget Status] =
+VAR _v = [Sim Budget Variance]
+RETURN
+    SWITCH ( TRUE (),
+        ABS ( _v ) < 1, "On budget",
+        _v > 0, "Over budget by " & FORMAT ( _v, "$#,0" ),
+        "Under budget by " & FORMAT ( -_v, "$#,0" ) )
+// format: text
+
+// Simulated vs current spend.
+[Sim Spend Change %] =
+DIVIDE ( [Sim Spend] - [Current Plan Spend], [Current Plan Spend] )
+// format: 0.0%
+
+
+// ===== 4. Response Curves ==================================================
+// Annual incremental sales when every line item in context runs at Spend Index x current spend.
+[Curve Incremental Sales] =
+VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+RETURN
+    IF ( NOT ISBLANK ( _idx ),
+        SUMX ( ModelParameters,
+        VAR _x = ModelParameters[CurrentAnnualSpend] * _idx
+        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+        VAR _us = POWER ( _u, ModelParameters[S] )
+        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+            RETURN 52 * ModelParameters[Beta] * DIVIDE ( _us, _us + _ks ) ) )
+// format: \$#,0
+
+// Annual spend at the curve point.
+[Curve Spend] =
+VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+RETURN IF ( NOT ISBLANK ( _idx ), [Current Plan Spend] * _idx )
+// format: \$#,0
+
+// Marginal ROI along the response curve; where it crosses 1.00 is break-even.
+[Curve Marginal ROI] =
+VAR _idx = SELECTEDVALUE ( 'Spend Curve'[Spend Index] )
+VAR _spend = [Current Plan Spend] * _idx
+VAR _weighted =
+    SUMX ( ModelParameters,
+        VAR _x = ModelParameters[CurrentAnnualSpend] * _idx
+        VAR _u = DIVIDE ( _x, 52 * ModelParameters[Norm] )
+        VAR _us = POWER ( _u, ModelParameters[S] )
+        VAR _ks = POWER ( ModelParameters[K], ModelParameters[S] )
+        VAR _mroi =
+            IF ( _u > 0,
+                ModelParameters[Beta] * ModelParameters[S] * _ks * POWER ( _u, ModelParameters[S] - 1 )
+                    / POWER ( _us + _ks, 2 ) / ModelParameters[Norm],
+                IF ( ModelParameters[S] > 1, 0,
+                    IF ( ModelParameters[S] = 1, DIVIDE ( ModelParameters[Beta], ModelParameters[K] * ModelParameters[Norm] ) ) ) )
+        RETURN _x * _mroi )
+RETURN IF ( NOT ISBLANK ( _idx ) && _spend > 0, DIVIDE ( _weighted, _spend ) )
+// format: 0.00
+
+// Reference line: marginal ROI = 1.00.
+[Break-even Line] =
+1
+// format: 0.00

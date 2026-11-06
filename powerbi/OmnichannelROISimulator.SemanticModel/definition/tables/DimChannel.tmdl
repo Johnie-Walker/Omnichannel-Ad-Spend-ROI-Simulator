@@ -1,0 +1,47 @@
+table DimChannel
+	lineageTag: a4d15bd7-600f-50bd-b9f3-4ffa1fa5ef04
+
+	column Channel
+		dataType: string
+		lineageTag: 1acbbb51-44ca-521d-964c-afaa884b344f
+		summarizeBy: none
+		sourceColumn: Channel
+		sortByColumn: ChannelOrder
+
+		annotation SummarizationSetBy = Automatic
+
+	column ChannelOrder
+		dataType: int64
+		lineageTag: f4729385-2b53-54f3-bd17-b65913cc6e7c
+		summarizeBy: none
+		sourceColumn: ChannelOrder
+
+		annotation SummarizationSetBy = Automatic
+
+	column ChannelGroup
+		dataType: string
+		lineageTag: b07fb299-5028-5815-a1c8-c7928aab5ecc
+		summarizeBy: none
+		sourceColumn: ChannelGroup
+
+		annotation SummarizationSetBy = Automatic
+
+	column ChannelColor
+		dataType: string
+		lineageTag: fb8d606a-dc31-55e7-8ad4-9f96ce85dea9
+		summarizeBy: none
+		sourceColumn: ChannelColor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimChannel = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "DimChannel.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Channel", type text}, {"ChannelOrder", Int64.Type}, {"ChannelGroup", type text}, {"ChannelColor", type text}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

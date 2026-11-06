@@ -1,0 +1,6 @@
+Channel,ChannelOrder,ChannelGroup,ChannelColor
+TV,1,Offline,#2a78d6
+Paid Search,2,Online,#eb6834
+Paid Social,3,Online,#1baf7a
+Display,4,Online,#eda100
+Radio,5,Offline,#e87ba4

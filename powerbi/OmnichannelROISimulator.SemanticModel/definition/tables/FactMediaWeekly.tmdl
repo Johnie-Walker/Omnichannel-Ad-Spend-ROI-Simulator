@@ -1,0 +1,57 @@
+table FactMediaWeekly
+	lineageTag: e46b59b5-8a87-5af9-848e-4f76bca34f80
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 40f3c23f-3578-517e-b190-71f11aa2e7ec
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 367e0f44-8798-5911-a77b-b564fa5e54f5
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Channel
+		dataType: string
+		lineageTag: 748ff87b-c649-5059-b57a-7c57b5fdd0da
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column Spend
+		dataType: double
+		formatString: \$#,0
+		lineageTag: 137186c9-95c5-541b-b164-431b76cb1cd0
+		summarizeBy: sum
+		sourceColumn: Spend
+
+		annotation SummarizationSetBy = Automatic
+
+	column Contribution
+		dataType: double
+		formatString: \$#,0
+		lineageTag: 48dc2dbf-ec9a-5658-9bda-aaf8d5dce499
+		summarizeBy: sum
+		sourceColumn: Contribution
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactMediaWeekly = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "FactMediaWeekly.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"Region", type text}, {"Channel", type text}, {"Spend", type number}, {"Contribution", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,25 @@
+table 'TV Spend Level'
+	lineageTag: 87a6de27-fdd4-53f1-bf87-065da370ecff
+
+	/// Spend level for TV as a share of the baseline plan (100% = unchanged).
+	measure 'TV Spend Level Value' = SELECTEDVALUE ( 'TV Spend Level'[TV Spend Level], 1 )
+		formatString: 0%
+		lineageTag: 2c366a40-773c-5805-8bf3-f8088222391d
+
+	column 'TV Spend Level'
+		dataType: double
+		formatString: 0%
+		lineageTag: 34ab9b43-40b0-50c2-a8ef-a405deb24b97
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'TV Spend Level' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 2.5, 0.05 )

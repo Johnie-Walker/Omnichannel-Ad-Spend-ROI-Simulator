@@ -1,0 +1,30 @@
+{
+  "annual_budget": 5000000.0,
+  "current_incremental_sales": 12693368.387438923,
+  "optimized_incremental_sales": 14575350.82128471,
+  "incremental_sales_lift": 0.14826501338353615,
+  "incremental_sales_lift_ci90": [
+    0.08979000705101095,
+    0.18110094176869657
+  ],
+  "prob_lift_positive": 1.0,
+  "projected_base_sales": 37136044.71903268,
+  "total_sales_lift": 0.0377685049154505,
+  "current_roi": 2.5386736774877847,
+  "optimized_roi": 2.915070164256942,
+  "shadow_price_marginal_roi": 1.58267409705936,
+  "kkt_ok": true,
+  "kkt_max_gap": 7.9225371818481e-09,
+  "optimizer_starts_converged": "24/24",
+  "fit_r2": 0.9930651957275173,
+  "fit_mape": 0.014516283795149295,
+  "fit_nrmse": 0.01521577629140454,
+  "durbin_watson": 2.2068077251538085,
+  "holdout_r2": 0.9887319004209322,
+  "holdout_mape": 0.015591838469420378,
+  "train_mape": 0.014651129963537008,
+  "truth_lift_of_recommended_plan": 0.13524526944556925,
+  "truth_optimal_lift": 0.1382857528469863,
+  "truth_current_incremental_sales": 12624149.712616453,
+  "bootstrap_replicates": 200
+}

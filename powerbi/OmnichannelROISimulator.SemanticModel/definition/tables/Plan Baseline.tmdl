@@ -1,0 +1,24 @@
+table 'Plan Baseline'
+	lineageTag: a53c9f3a-3a41-5f08-a422-0edbb1f35d2b
+
+	column Plan
+		dataType: string
+		lineageTag: 87fe0702-ba7a-5012-8cd2-036478eca223
+		summarizeBy: none
+		sourceColumn: [Plan]
+		sortByColumn: 'Plan Order'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Plan Order'
+		dataType: int64
+		isHidden
+		lineageTag: 66f04ab1-4ccb-52de-877b-5d39ab7d0c8a
+		summarizeBy: none
+		sourceColumn: [Plan Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Plan Baseline' = calculated
+		mode: import
+		source = DATATABLE ( "Plan", STRING, "Plan Order", INTEGER, { { "Current Plan", 1 }, { "Optimized Plan", 2 } } )

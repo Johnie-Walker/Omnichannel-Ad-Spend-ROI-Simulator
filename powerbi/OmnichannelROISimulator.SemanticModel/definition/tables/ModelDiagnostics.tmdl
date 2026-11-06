@@ -1,0 +1,38 @@
+table ModelDiagnostics
+	lineageTag: 23bcf018-a47c-56f4-9e80-f1c928cf1b07
+
+	column Metric
+		dataType: string
+		lineageTag: 70ef71a1-0113-5f72-bcc7-53fa989076bf
+		summarizeBy: none
+		sourceColumn: Metric
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: double
+		lineageTag: 50e9d20a-a953-5c91-aaa8-00941b9c9c1c
+		summarizeBy: none
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+	column Scope
+		dataType: string
+		lineageTag: 4564c707-94e5-5e9f-b0e5-77d01d5406da
+		summarizeBy: none
+		sourceColumn: Scope
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ModelDiagnostics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "ModelDiagnostics.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Metric", type text}, {"Value", type number}, {"Scope", type text}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

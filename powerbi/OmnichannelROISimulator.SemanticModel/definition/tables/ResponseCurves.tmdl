@@ -1,0 +1,62 @@
+table ResponseCurves
+	lineageTag: 0362c354-4752-5f87-a7ca-301117e7bd13
+
+	column Channel
+		dataType: string
+		lineageTag: 71b3e2ac-6dcd-5426-bffd-912b48b78be3
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 1f6b4834-36ed-5261-bbf5-2a1e6dc3cf60
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column SpendIndex
+		dataType: double
+		lineageTag: 31bf8e7e-b6df-5b6d-8bbc-8340182cc895
+		summarizeBy: none
+		sourceColumn: SpendIndex
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnnualSpend
+		dataType: double
+		lineageTag: 0a475e0b-5d1f-52f5-960e-353d71b6fe80
+		summarizeBy: none
+		sourceColumn: AnnualSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column IncrementalSales
+		dataType: double
+		lineageTag: 6a7adfb1-2772-5e3f-866d-bda97c636d47
+		summarizeBy: none
+		sourceColumn: IncrementalSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column MarginalROI
+		dataType: double
+		lineageTag: c707c692-d164-50ed-8aee-034385b89471
+		summarizeBy: none
+		sourceColumn: MarginalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ResponseCurves = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "ResponseCurves.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Channel", type text}, {"Region", type text}, {"SpendIndex", type number}, {"AnnualSpend", type number}, {"IncrementalSales", type number}, {"MarginalROI", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

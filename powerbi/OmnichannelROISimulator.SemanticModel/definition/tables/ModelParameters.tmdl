@@ -1,0 +1,174 @@
+table ModelParameters
+	lineageTag: 2b7779c4-60f8-50a9-8159-c42a4e653b53
+
+	column Channel
+		dataType: string
+		lineageTag: 0a58fc1b-e18f-5fc7-b911-1c2caaf630a9
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: a5495e3a-07e2-5252-9a6f-1b68b961373e
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Theta
+		dataType: double
+		lineageTag: da3ebb7f-25e1-5469-937d-3cc26aa72247
+		summarizeBy: none
+		sourceColumn: Theta
+
+		annotation SummarizationSetBy = Automatic
+
+	column HalfLifeWeeks
+		dataType: double
+		lineageTag: bcfb8c89-0265-5dff-9555-54bd32195655
+		summarizeBy: none
+		sourceColumn: HalfLifeWeeks
+
+		annotation SummarizationSetBy = Automatic
+
+	column K
+		dataType: double
+		lineageTag: 1fa221cd-2487-590e-afdf-0860841c6006
+		summarizeBy: none
+		sourceColumn: K
+
+		annotation SummarizationSetBy = Automatic
+
+	column S
+		dataType: double
+		lineageTag: 6de484e7-f38b-5894-b01e-5a571bb9620d
+		summarizeBy: none
+		sourceColumn: S
+
+		annotation SummarizationSetBy = Automatic
+
+	column Beta
+		dataType: double
+		lineageTag: 7ecc3f4b-0b21-5e18-b0a7-addd3b8584c6
+		summarizeBy: none
+		sourceColumn: Beta
+
+		annotation SummarizationSetBy = Automatic
+
+	column Norm
+		dataType: double
+		lineageTag: a4dc5e15-f420-58e0-9075-501af23ef5ca
+		summarizeBy: none
+		sourceColumn: Norm
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentAnnualSpend
+		dataType: double
+		lineageTag: c30c0832-bfec-57da-a2ff-3c27c7c1fac3
+		summarizeBy: none
+		sourceColumn: CurrentAnnualSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalAnnualSpend
+		dataType: double
+		lineageTag: 9b77e3fb-47e3-5205-a78a-20be7909ce48
+		summarizeBy: none
+		sourceColumn: OptimalAnnualSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column SpendChangePct
+		dataType: double
+		lineageTag: c0fde369-e4ff-52d2-9e40-177ba01dfd4a
+		summarizeBy: none
+		sourceColumn: SpendChangePct
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentIncrementalSales
+		dataType: double
+		lineageTag: 0b7a839f-aeb0-5241-a5f2-4602ed3edb15
+		summarizeBy: none
+		sourceColumn: CurrentIncrementalSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalIncrementalSales
+		dataType: double
+		lineageTag: d764fede-7c99-523f-956a-088da905d8b4
+		summarizeBy: none
+		sourceColumn: OptimalIncrementalSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentMarginalROI
+		dataType: double
+		lineageTag: 006d5cf5-1aa9-5e6e-a310-2718f555f689
+		summarizeBy: none
+		sourceColumn: CurrentMarginalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalMarginalROI
+		dataType: double
+		lineageTag: e7092ee8-3c70-5606-9150-862e7debf2f1
+		summarizeBy: none
+		sourceColumn: OptimalMarginalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column MinAnnualSpend
+		dataType: double
+		lineageTag: caa9543f-f539-5682-8cc9-8fbcac762397
+		summarizeBy: none
+		sourceColumn: MinAnnualSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column MaxAnnualSpend
+		dataType: double
+		lineageTag: da2ed5fb-d2f0-5e26-be87-227fde8bb073
+		summarizeBy: none
+		sourceColumn: MaxAnnualSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column Constraint
+		dataType: string
+		lineageTag: 48394bdd-79e6-523a-ad4f-900cfdca937c
+		summarizeBy: none
+		sourceColumn: Constraint
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentROI
+		dataType: double
+		lineageTag: d0db4809-82df-51a5-b315-0a1d3a497dba
+		summarizeBy: none
+		sourceColumn: CurrentROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalROI
+		dataType: double
+		lineageTag: 4e505e20-e967-57dc-ba3a-9e9e39e999b9
+		summarizeBy: none
+		sourceColumn: OptimalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ModelParameters = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "ModelParameters.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Channel", type text}, {"Region", type text}, {"Theta", type number}, {"HalfLifeWeeks", type number}, {"K", type number}, {"S", type number}, {"Beta", type number}, {"Norm", type number}, {"CurrentAnnualSpend", type number}, {"OptimalAnnualSpend", type number}, {"SpendChangePct", type number}, {"CurrentIncrementalSales", type number}, {"OptimalIncrementalSales", type number}, {"CurrentMarginalROI", type number}, {"OptimalMarginalROI", type number}, {"MinAnnualSpend", type number}, {"MaxAnnualSpend", type number}, {"Constraint", type text}, {"CurrentROI", type number}, {"OptimalROI", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

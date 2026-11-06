@@ -1,0 +1,25 @@
+table 'Radio Spend Level'
+	lineageTag: 37b10b54-3441-512e-b45c-fb3af8a2595d
+
+	/// Spend level for Radio as a share of the baseline plan (100% = unchanged).
+	measure 'Radio Spend Level Value' = SELECTEDVALUE ( 'Radio Spend Level'[Radio Spend Level], 1 )
+		formatString: 0%
+		lineageTag: 9b293da6-f484-5743-aaf1-2c5c35bf8499
+
+	column 'Radio Spend Level'
+		dataType: double
+		formatString: 0%
+		lineageTag: c8666e3c-eede-5fb1-bc44-c26e5ed99fb5
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Radio Spend Level' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 2.5, 0.05 )

@@ -1,0 +1,25 @@
+table 'Paid Search Spend Level'
+	lineageTag: 2ecd75fd-c6a9-5fc4-9b61-87941720eea4
+
+	/// Spend level for Paid Search as a share of the baseline plan (100% = unchanged).
+	measure 'Paid Search Spend Level Value' = SELECTEDVALUE ( 'Paid Search Spend Level'[Paid Search Spend Level], 1 )
+		formatString: 0%
+		lineageTag: 94fa935a-69a0-5404-8339-684527ed1f1b
+
+	column 'Paid Search Spend Level'
+		dataType: double
+		formatString: 0%
+		lineageTag: c436fb49-3efd-5ba9-bf10-05a3a288635a
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Paid Search Spend Level' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 2.5, 0.05 )

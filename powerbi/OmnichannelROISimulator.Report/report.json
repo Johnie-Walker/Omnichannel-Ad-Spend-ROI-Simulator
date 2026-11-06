@@ -1,0 +1,50 @@
+{
+  "config": "{\"version\": \"5.43\", \"themeCollection\": {}, \"activeSectionIndex\": 0}",
+  "layoutOptimization": 0,
+  "sections": [
+    {
+      "config": "{}",
+      "displayName": "Executive Summary",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.0,
+      "name": "ReportSection0",
+      "ordinal": 0,
+      "visualContainers": [],
+      "width": 1280.0
+    },
+    {
+      "config": "{}",
+      "displayName": "Budget Simulator",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.0,
+      "name": "ReportSection1",
+      "ordinal": 1,
+      "visualContainers": [],
+      "width": 1280.0
+    },
+    {
+      "config": "{}",
+      "displayName": "Response Curves & Marginal ROI",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.0,
+      "name": "ReportSection2",
+      "ordinal": 2,
+      "visualContainers": [],
+      "width": 1280.0
+    },
+    {
+      "config": "{}",
+      "displayName": "Model Validation",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.0,
+      "name": "ReportSection3",
+      "ordinal": 3,
+      "visualContainers": [],
+      "width": 1280.0
+    }
+  ]
+}

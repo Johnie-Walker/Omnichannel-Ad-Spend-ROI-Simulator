@@ -1,0 +1,25 @@
+table 'Paid Social Spend Level'
+	lineageTag: 21139f4c-8ba8-5103-a5b6-a46c58d1c3a0
+
+	/// Spend level for Paid Social as a share of the baseline plan (100% = unchanged).
+	measure 'Paid Social Spend Level Value' = SELECTEDVALUE ( 'Paid Social Spend Level'[Paid Social Spend Level], 1 )
+		formatString: 0%
+		lineageTag: 33d84bc3-b2a9-50d2-9bfd-fa4ad0caac25
+
+	column 'Paid Social Spend Level'
+		dataType: double
+		formatString: 0%
+		lineageTag: bde6cabe-e154-5232-9fe6-8bff6f63d2fa
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Paid Social Spend Level' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 2.5, 0.05 )

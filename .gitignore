@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+# Power BI Desktop local state
+**/.pbi/localSettings.json
+**/.pbi/cache.abf

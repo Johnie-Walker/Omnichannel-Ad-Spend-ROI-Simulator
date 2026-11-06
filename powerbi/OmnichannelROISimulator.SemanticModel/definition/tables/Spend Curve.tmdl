@@ -1,0 +1,15 @@
+table 'Spend Curve'
+	lineageTag: 9e999563-b4c7-5feb-b1b3-437e3a5410f1
+
+	column 'Spend Index'
+		dataType: double
+		formatString: 0%
+		lineageTag: 8ff3c86d-b463-5908-8e89-6e8fd295f076
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = User
+
+	partition 'Spend Curve' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 3, 0.05 )

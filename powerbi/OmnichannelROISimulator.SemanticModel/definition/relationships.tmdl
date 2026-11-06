@@ -1,0 +1,39 @@
+relationship b1cbb3db-9d7b-5678-a1cf-90a00740f275
+	fromColumn: FactMediaWeekly.Channel
+	toColumn: DimChannel.Channel
+
+relationship dfe55c17-e5c9-5f14-9c86-867bee5a6755
+	fromColumn: FactMediaWeekly.Region
+	toColumn: DimRegion.Region
+
+relationship 4f388d50-aea0-57a2-a298-04724ab3be75
+	fromColumn: FactMediaWeekly.Date
+	toColumn: DimDate.Date
+
+relationship e0480bf3-e037-5461-a299-26b1696477bf
+	fromColumn: FactSalesWeekly.Region
+	toColumn: DimRegion.Region
+
+relationship b9c88253-0f57-5686-9ba8-f9c9152fc281
+	fromColumn: FactSalesWeekly.Date
+	toColumn: DimDate.Date
+
+relationship 0e934d46-abbd-5d9f-becc-194a7af68725
+	fromColumn: ModelParameters.Channel
+	toColumn: DimChannel.Channel
+
+relationship 228ba2b9-f33d-5004-9ac0-6cfb5666c070
+	fromColumn: ModelParameters.Region
+	toColumn: DimRegion.Region
+
+relationship a0fc93e8-37d5-5482-8a81-c73f34f59680
+	fromColumn: ResponseCurves.Channel
+	toColumn: DimChannel.Channel
+
+relationship 260409cb-693b-56fc-b874-3aaa27247bc6
+	fromColumn: ResponseCurves.Region
+	toColumn: DimRegion.Region
+
+relationship de26f842-7350-5cb7-a01c-90e4a1ca8a8c
+	fromColumn: ChannelSummary.Channel
+	toColumn: DimChannel.Channel

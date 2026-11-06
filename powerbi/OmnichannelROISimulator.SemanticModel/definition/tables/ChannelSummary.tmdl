@@ -1,0 +1,190 @@
+table ChannelSummary
+	lineageTag: 01edaf5c-a023-5b3e-bd11-e640ecdf464b
+
+	column Channel
+		dataType: string
+		lineageTag: 399f2128-7b2f-53a2-8e8e-09aad6285c1c
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column ChannelOrder
+		dataType: int64
+		lineageTag: 1a090340-d6ee-5ebc-a704-acc4d05656bc
+		summarizeBy: none
+		sourceColumn: ChannelOrder
+
+		annotation SummarizationSetBy = Automatic
+
+	column HistoricalSpend
+		dataType: double
+		lineageTag: e498a114-992c-524b-83e6-462dcd1cc747
+		summarizeBy: none
+		sourceColumn: HistoricalSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column HistoricalIncrementalSales
+		dataType: double
+		lineageTag: b766dc38-6786-5d86-b260-c057d38e7b85
+		summarizeBy: none
+		sourceColumn: HistoricalIncrementalSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column HistoricalROI
+		dataType: double
+		lineageTag: 919facc2-2055-5e2b-a853-a16998cbc806
+		summarizeBy: none
+		sourceColumn: HistoricalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HistoricalROI_P05'
+		dataType: double
+		lineageTag: 27b5dacd-ffc1-5245-b153-77f858d9316f
+		summarizeBy: none
+		sourceColumn: HistoricalROI_P05
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HistoricalROI_P95'
+		dataType: double
+		lineageTag: 1ea9fdfb-6483-56e3-9c10-88dfdbb70f1c
+		summarizeBy: none
+		sourceColumn: HistoricalROI_P95
+
+		annotation SummarizationSetBy = Automatic
+
+	column TrueHistoricalROI
+		dataType: double
+		lineageTag: 5dbfdfa4-18ba-5347-9641-6f1c9bd30dc9
+		summarizeBy: none
+		sourceColumn: TrueHistoricalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentPlanSpend
+		dataType: double
+		lineageTag: 48f3b5b9-a284-5cb7-bc36-a29c1c6c6454
+		summarizeBy: none
+		sourceColumn: CurrentPlanSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalPlanSpend
+		dataType: double
+		lineageTag: 7ad2ba88-a6ca-5a38-b317-190beaa01105
+		summarizeBy: none
+		sourceColumn: OptimalPlanSpend
+
+		annotation SummarizationSetBy = Automatic
+
+	column SpendChangePct
+		dataType: double
+		lineageTag: 581bee79-c529-5e9b-8873-c726641df7f3
+		summarizeBy: none
+		sourceColumn: SpendChangePct
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentPlanROI
+		dataType: double
+		lineageTag: 5c998bd6-a4f5-5fad-a9de-aa34729aafd7
+		summarizeBy: none
+		sourceColumn: CurrentPlanROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalPlanROI
+		dataType: double
+		lineageTag: ff7b7b7b-08d7-5142-a294-6b2d79c74554
+		summarizeBy: none
+		sourceColumn: OptimalPlanROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column CurrentMarginalROI
+		dataType: double
+		lineageTag: 4e2abdcd-22c1-5349-8f7d-f872e7b9a41d
+		summarizeBy: none
+		sourceColumn: CurrentMarginalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column OptimalMarginalROI
+		dataType: double
+		lineageTag: f928a2db-0802-5ec5-8fe6-d1b6e7402db8
+		summarizeBy: none
+		sourceColumn: OptimalMarginalROI
+
+		annotation SummarizationSetBy = Automatic
+
+	column Theta
+		dataType: double
+		lineageTag: 426c8715-8214-5d49-b6e6-00d401231e13
+		summarizeBy: none
+		sourceColumn: Theta
+
+		annotation SummarizationSetBy = Automatic
+
+	column HalfLifeWeeks
+		dataType: double
+		lineageTag: 55d15884-caee-5b06-8702-f45c6b281da6
+		summarizeBy: none
+		sourceColumn: HalfLifeWeeks
+
+		annotation SummarizationSetBy = Automatic
+
+	column K
+		dataType: double
+		lineageTag: 26cd7e6c-721f-584c-851a-5b79a06d0a03
+		summarizeBy: none
+		sourceColumn: K
+
+		annotation SummarizationSetBy = Automatic
+
+	column S
+		dataType: double
+		lineageTag: 756da8e5-d8dc-5cf3-b49b-fa650240e6b0
+		summarizeBy: none
+		sourceColumn: S
+
+		annotation SummarizationSetBy = Automatic
+
+	column TrueTheta
+		dataType: double
+		lineageTag: f7d7998d-9ea5-584d-ac8e-8aefcbf6c8f8
+		summarizeBy: none
+		sourceColumn: TrueTheta
+
+		annotation SummarizationSetBy = Automatic
+
+	column TrueK
+		dataType: double
+		lineageTag: 453c8e41-ee56-5288-971a-2f27b47bc82e
+		summarizeBy: none
+		sourceColumn: TrueK
+
+		annotation SummarizationSetBy = Automatic
+
+	column TrueS
+		dataType: double
+		lineageTag: e88b0b17-7170-5b27-b8e2-94bccefe544b
+		summarizeBy: none
+		sourceColumn: TrueS
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ChannelSummary = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "ChannelSummary.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Channel", type text}, {"ChannelOrder", Int64.Type}, {"HistoricalSpend", type number}, {"HistoricalIncrementalSales", type number}, {"HistoricalROI", type number}, {"HistoricalROI_P05", type number}, {"HistoricalROI_P95", type number}, {"TrueHistoricalROI", type number}, {"CurrentPlanSpend", type number}, {"OptimalPlanSpend", type number}, {"SpendChangePct", type number}, {"CurrentPlanROI", type number}, {"OptimalPlanROI", type number}, {"CurrentMarginalROI", type number}, {"OptimalMarginalROI", type number}, {"Theta", type number}, {"HalfLifeWeeks", type number}, {"K", type number}, {"S", type number}, {"TrueTheta", type number}, {"TrueK", type number}, {"TrueS", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

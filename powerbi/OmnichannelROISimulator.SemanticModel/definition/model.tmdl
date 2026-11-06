@@ -1,0 +1,31 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["DataFolder", "DimChannel", "DimRegion", "DimDate", "FactMediaWeekly", "FactSalesWeekly", "ModelParameters", "ResponseCurves", "ChannelSummary", "BudgetFrontier", "ModelDiagnostics"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+ref table DimChannel
+ref table DimRegion
+ref table DimDate
+ref table FactMediaWeekly
+ref table FactSalesWeekly
+ref table ModelParameters
+ref table ResponseCurves
+ref table ChannelSummary
+ref table BudgetFrontier
+ref table ModelDiagnostics
+ref table 'Plan Baseline'
+ref table 'Spend Curve'
+ref table '_Measures'
+ref table 'TV Spend Level'
+ref table 'Paid Search Spend Level'
+ref table 'Paid Social Spend Level'
+ref table 'Display Spend Level'
+ref table 'Radio Spend Level'

@@ -1,0 +1,4 @@
+expression DataFolder = "C:\Users\DELL\OneDrive\Desktop\Python\Omnichannel Ad Spend ROI Simulator\powerbi\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 89a18697-6605-59b0-ad99-ab94347d285e
+
+	annotation PBI_ResultType = Text

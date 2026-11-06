@@ -1,0 +1,25 @@
+table 'Display Spend Level'
+	lineageTag: 18a9d6bf-537b-5990-8b8c-49ca7eb50c4f
+
+	/// Spend level for Display as a share of the baseline plan (100% = unchanged).
+	measure 'Display Spend Level Value' = SELECTEDVALUE ( 'Display Spend Level'[Display Spend Level], 1 )
+		formatString: 0%
+		lineageTag: 761f9392-2314-5ad2-a43c-5343ec0dbb0b
+
+	column 'Display Spend Level'
+		dataType: double
+		formatString: 0%
+		lineageTag: 87b7070d-b8d8-5abf-81b9-4c346adafcda
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Display Spend Level' = calculated
+		mode: import
+		source = GENERATESERIES ( 0, 2.5, 0.05 )

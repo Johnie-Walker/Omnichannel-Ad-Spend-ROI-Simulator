@@ -1,0 +1,84 @@
+table FactSalesWeekly
+	lineageTag: 877a9940-89cf-5b67-bae9-a7144b2b8b37
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: f660506f-fe6e-5ea0-b0ec-7df98f29a418
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 12da2ae6-11ed-5851-8b69-50f3bfb251e2
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActualSales
+		dataType: double
+		formatString: \$#,0
+		lineageTag: 5f084068-ddc9-5048-a2ac-59f8a8d3d6ba
+		summarizeBy: sum
+		sourceColumn: ActualSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column PredictedSales
+		dataType: double
+		formatString: \$#,0
+		lineageTag: 894b45bb-f6fb-5824-a8a6-d24570490715
+		summarizeBy: sum
+		sourceColumn: PredictedSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column BaseSales
+		dataType: double
+		formatString: \$#,0
+		lineageTag: f065f8d2-1054-5d99-bee3-95511cc91c6d
+		summarizeBy: sum
+		sourceColumn: BaseSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column MediaSales
+		dataType: double
+		formatString: \$#,0
+		lineageTag: dc78ec62-fa5a-515b-a23d-e14bbdf79714
+		summarizeBy: sum
+		sourceColumn: MediaSales
+
+		annotation SummarizationSetBy = Automatic
+
+	column HoldoutPrediction
+		dataType: double
+		formatString: \$#,0
+		lineageTag: a32015c6-3e07-5309-b5ef-61afd666169c
+		summarizeBy: sum
+		sourceColumn: HoldoutPrediction
+
+		annotation SummarizationSetBy = Automatic
+
+	column Split
+		dataType: string
+		lineageTag: 8db65370-992f-58db-9a67-54e785f36059
+		summarizeBy: none
+		sourceColumn: Split
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactSalesWeekly = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "FactSalesWeekly.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"Date", type date}, {"Region", type text}, {"ActualSales", type number}, {"PredictedSales", type number}, {"BaseSales", type number}, {"MediaSales", type number}, {"HoldoutPrediction", type number}, {"Split", type text}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

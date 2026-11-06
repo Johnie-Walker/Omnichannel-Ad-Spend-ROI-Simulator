@@ -1,0 +1,6 @@
+Scenario,PlanBaseline,TV Spend Level,Paid Search Spend Level,Paid Social Spend Level,Display Spend Level,Radio Spend Level,Expected Spend,Expected IncrementalSales,Expected ROI,Expected MarginalROI
+"Current plan, all 100%",Current Plan,1.0,1.0,1.0,1.0,1.0,5000000.0,12693368.387438923,2.5386736774877847,1.3995804613809304
+"Optimized plan, all 100%",Optimized Plan,1.0,1.0,1.0,1.0,1.0,5000000.0,14575350.82128471,2.915070164256942,1.5683427217955201
+"Current: TV 70%, Search 150%, Social 150%, Display 50%",Current Plan,0.7,1.5,1.5,0.5,1.0,4530000.0,13440099.09562754,2.9669092926330114,1.7848919261818423
+Optimized: TV 120%,Optimized Plan,1.2,1.0,1.0,1.0,1.0,5270491.699975504,14925257.139873737,2.8318528876429325,1.4040879319192399
+Current: Display 0%,Current Plan,1.0,1.0,1.0,0.0,1.0,3900000.0,11464192.59830522,2.939536563668005,1.650420466543499
